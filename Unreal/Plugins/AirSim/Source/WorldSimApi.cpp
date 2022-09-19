@@ -482,12 +482,20 @@ bool WorldSimApi::setObjectMaterialFromTexture(const std::string& object_name, c
             AActor* actor = UAirBlueprintLib::FindActor<AActor>(simmode_, FString(object_name.c_str()));
 
             if (IsValid(actor)) {
-                TArray<UStaticMeshComponent*> components;
-                actor->GetComponents<UStaticMeshComponent>(components);
-                for (UStaticMeshComponent* staticMeshComponent : components) {
+                TArray<UStaticMeshComponent*> static_components;
+                actor->GetComponents<UStaticMeshComponent>(static_components);
+                for (UStaticMeshComponent* staticMeshComponent : static_components) {
                     UMaterialInstanceDynamic* dynamic_material = UMaterialInstanceDynamic::Create(simmode_->domain_rand_material_, staticMeshComponent);
                     dynamic_material->SetTextureParameterValue("TextureParameter", texture_desired);
                     staticMeshComponent->SetMaterial(component_id, dynamic_material);
+                }
+                
+                TArray<USkeletalMeshComponent*> skeletal_components;
+                actor->GetComponents<USkeletalMeshComponent>(skeletal_components);
+                for (USkeletalMeshComponent* skeletalMeshComponent : skeletal_components) {
+                    UMaterialInstanceDynamic* dynamic_material = UMaterialInstanceDynamic::Create(simmode_->domain_rand_material_, skeletalMeshComponent);
+                    dynamic_material->SetTextureParameterValue("TextureParameter", texture_desired);
+                    skeletalMeshComponent->SetMaterial(component_id, dynamic_material);
                 }
                 success = true;
             }
@@ -517,10 +525,16 @@ bool WorldSimApi::setObjectMaterial(const std::string& object_name, const std::s
         }
         else {
             if (IsValid(actor)) {
-                TArray<UStaticMeshComponent*> components;
-                actor->GetComponents<UStaticMeshComponent>(components);
-                for (UStaticMeshComponent* staticMeshComponent : components) {
+                TArray<UStaticMeshComponent*> static_components;
+                actor->GetComponents<UStaticMeshComponent>(static_components);
+                for (UStaticMeshComponent* staticMeshComponent : static_components) {
                     staticMeshComponent->SetMaterial(component_id, material);
+                }
+                
+                TArray<USkeletalMeshComponent*> skeletal_components;
+                actor->GetComponents<USkeletalMeshComponent>(skeletal_components);
+                for (USkeletalMeshComponent* skeletalMeshComponent : skeletal_components) {
+                    skeletalMeshComponent->SetMaterial(component_id, material);
                 }
                 success = true;
             }
